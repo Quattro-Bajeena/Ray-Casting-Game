@@ -292,6 +292,10 @@ paket-files/
 .fake/
 
 # JetBrains Rider
+
+Lab2/
+Low level programming/
+
 .idea/
 *.sln.iml
 
