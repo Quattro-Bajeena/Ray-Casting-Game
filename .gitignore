@@ -295,6 +295,7 @@ paket-files/
 
 Lab2/
 Low level programming/
+*.pdf
 
 .idea/
 *.sln.iml
