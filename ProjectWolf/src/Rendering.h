@@ -20,12 +20,12 @@ typedef struct {
 
 void ClearBuffer(unsigned char* pixelBuffer, Vector2i windowSize);
 void DrawPixel(int width, int height, unsigned char r, unsigned char g, unsigned char b, unsigned char* pixelBuffer, Vector2i windowSize);
-void DrawPlayer(Player* player, SDL_Renderer* renderer);
+void DrawPlayer(const Player player, SDL_Renderer* renderer);
 void DrawMap(Vector2i mapSize, int squareSize, int* map, SDL_Renderer* renderer);
 
-RayInfo CalculateRayHit(RayInfo ray, const Player* player, int tileSize, Vector2i mapSize, const int* mapWall);
+RayInfo CalculateRayHit(RayInfo ray, const Player player, int tileSize, Vector2i mapSize, const int* mapWall);
 TextureDrawInfo CalculateWallTexture(RayInfo ray, int lineHeight, int textureSize, Vector2i renderSize);
-void DrawRays(Player* player, float FOV_deg,
+void DrawRays(const Player player, float FOV_deg,
 	int* mapWall, int* mapFloor, int* mapCeiling,
 	Vector2i mapSize, int tileSize, int textureSize, int* Textures,
-	SDL_Renderer* rendererMap, int* pixelBuffer, Vector2i renderSize, Vector2i screenMap);
+	SDL_Renderer* rendererMap, int* pixelBuffer, Vector2i renderSize);

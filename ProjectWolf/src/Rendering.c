@@ -6,34 +6,34 @@ void ClearBuffer(unsigned char* pixelBuffer, Vector2i windowSize) {
 	memset(pixelBuffer, 0, windowSize.x * windowSize.y * 4);
 }
 
-void DrawPixel(int width, int height , unsigned char r, unsigned char g, unsigned char b, unsigned char* pixelBuffer, Vector2i windowSize) {
-	pixelBuffer[((height * windowSize.x) + width) * 4] = r;
-	pixelBuffer[((height * windowSize.x) + width) * 4 + 1] = g;
-	pixelBuffer[((height * windowSize.x) + width) * 4 + 2] = b;
-	pixelBuffer[((height * windowSize.x) + width) * 4 + 3] = 255;
+void DrawPixel(int x, int y , unsigned char r, unsigned char g, unsigned char b, unsigned char* pixelBuffer, Vector2i windowSize) {
+	pixelBuffer[((y * windowSize.x) + x) * 4] = r;
+	pixelBuffer[((y * windowSize.x) + x) * 4 + 1] = g;
+	pixelBuffer[((y * windowSize.x) + x) * 4 + 2] = b;
+	pixelBuffer[((y * windowSize.x) + x) * 4 + 3] = 255;
 }
 
 
-void DrawPlayer(Player* player, SDL_Renderer* renderer)
+void DrawPlayer(const Player player, SDL_Renderer* renderer)
 {
-	SDL_Rect playerRect = { player->pos.x - 4,player->pos.y - 4, 8, 8 };
+	SDL_Rect playerRect = { player.pos.x - 4,player.pos.y - 4, 8, 8 };
 	SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255);
 	SDL_RenderFillRect(renderer, &playerRect);
 
-	//SDL_RenderSetScale(renderer, 2, 2);
+
 	Vector2f deltaRot = {
-		player->dir.x * cos(M_PI / 2) - player->dir.y * sin(M_PI / 2),
-		player->dir.x * sin(M_PI / 2) + player->dir.y * cos(M_PI / 2)
+		player.dir.x * cos(M_PI / 2) - player.dir.y * sin(M_PI / 2),
+		player.dir.x * sin(M_PI / 2) + player.dir.y * cos(M_PI / 2)
 	};
 
 	float thickness = 0.3;
-	int length = 6;
+	int length = 20;
 	SDL_Point points[] = {
-		{ player->pos.x + deltaRot.x * thickness, player->pos.y + deltaRot.y * thickness },
-		{ player->pos.x - deltaRot.x * thickness, player->pos.y - deltaRot.y * thickness },
-		{ (player->pos.x + player->dir.x * length) - deltaRot.x * thickness, (player->pos.y + player->dir.y * length) - deltaRot.y * thickness },
-		{ (player->pos.x + player->dir.x * length) + deltaRot.x * thickness, (player->pos.y + player->dir.y * length) + deltaRot.y * thickness},
-		{ player->pos.x + deltaRot.x * thickness, player->pos.y + deltaRot.y * thickness }
+		{ player.pos.x + deltaRot.x * thickness, player.pos.y + deltaRot.y * thickness },
+		{ player.pos.x - deltaRot.x * thickness, player.pos.y - deltaRot.y * thickness },
+		{ (player.pos.x + player.dir.x * length) - deltaRot.x * thickness, (player.pos.y + player.dir.y * length) - deltaRot.y * thickness },
+		{ (player.pos.x + player.dir.x * length) + deltaRot.x * thickness, (player.pos.y + player.dir.y * length) + deltaRot.y * thickness},
+		{ player.pos.x + deltaRot.x * thickness, player.pos.y + deltaRot.y * thickness }
 	};
 
 	SDL_RenderDrawLines(renderer, points, 5);
@@ -47,8 +47,10 @@ void DrawMap(Vector2i mapSize, int squareSize, int* map, SDL_Renderer* renderer)
 
 			int wallValue = map[y * mapSize.x + x];
 
-			
-			if (wallValue >= 1) {
+			if (wallValue < 0) {
+				SDL_SetRenderDrawColor(renderer, 0, 100, 0, 255);
+			}
+			else if (wallValue >= 1) {
 				SDL_SetRenderDrawColor(renderer, 220, 220, wallValue * 50, 255);
 			}
 			else {
@@ -67,7 +69,7 @@ void DrawMap(Vector2i mapSize, int squareSize, int* map, SDL_Renderer* renderer)
 
 
 
-RayInfo CalculateRayHit(RayInfo ray, const Player* player, int tileSize, Vector2i mapSize, const int* mapWall) {
+RayInfo CalculateRayHit(RayInfo ray, const Player player, int tileSize, Vector2i mapSize, const int* mapWall) {
 
 
 	ray.distance = FLT_MAX;
@@ -78,7 +80,7 @@ RayInfo CalculateRayHit(RayInfo ray, const Player* player, int tileSize, Vector2
 	*/
 	int dof = 0;
 	float distanceHorizontal = FLT_MAX;
-	Vector2f horizontalRay;
+	Vector2f horizontalRay = { 0,0 };
 	
 	float aTan = -1 / tan(ray.angle);
 	
@@ -100,8 +102,8 @@ RayInfo CalculateRayHit(RayInfo ray, const Player* player, int tileSize, Vector2
 
 		// ray.y is truncated version of player.y, 
 		//so it starts on the top edge of tile player is standing on
-		ray.hit.y = ((int)player->pos.y / tileSize) * tileSize - 0.0001;
-		ray.hit.x = (player->pos.y - ray.hit.y) * aTan + player->pos.x;
+		ray.hit.y = ((int)player.pos.y / tileSize) * tileSize - 0.0001;
+		ray.hit.x = (player.pos.y - ray.hit.y) * aTan + player.pos.x;
 		offset.y = -tileSize;
 		offset.x = -offset.y * aTan;
 	}
@@ -110,15 +112,15 @@ RayInfo CalculateRayHit(RayInfo ray, const Player* player, int tileSize, Vector2
 
 		// ray.y is truncated version of player.y + size of tile
 		//so it starts on the bottom  edge of tile player is standing on
-		ray.hit.y = ((int)player->pos.y / tileSize) * tileSize + tileSize;
-		ray.hit.x = (player->pos.y - ray.hit.y) * aTan + player->pos.x;
+		ray.hit.y = ((int)player.pos.y / tileSize) * tileSize + tileSize;
+		ray.hit.x = (player.pos.y - ray.hit.y) * aTan + player.pos.x;
 		offset.y = tileSize;
 		offset.x = -offset.y * aTan;
 	}
 	//looking stright left or right
 	if (ray.angle == 0 || ray.angle == M_PI) {
-		ray.hit.x = player->pos.x;
-		ray.hit.y = player->pos.y;
+		ray.hit.x = player.pos.x;
+		ray.hit.y = player.pos.y;
 		dof = 8;
 	}
 
@@ -135,7 +137,7 @@ RayInfo CalculateRayHit(RayInfo ray, const Player* player, int tileSize, Vector2
 
 			dof = 8;
 			horizontalRay = ray.hit;
-			distanceHorizontal = Distance(player->pos, horizontalRay);
+			distanceHorizontal = Distance(player.pos, horizontalRay);
 			wallTextureX = mapWall[mapIndex] - 1;
 		}
 		// Just check the next horizontal line
@@ -162,23 +164,23 @@ RayInfo CalculateRayHit(RayInfo ray, const Player* player, int tileSize, Vector2
 	if (ray.angle > M_PI / 2 && ray.angle < 3 * M_PI / 2) {
 
 
-		ray.hit.x = ((int)player->pos.x / tileSize) * tileSize - 0.0001;
-		ray.hit.y = (player->pos.x - ray.hit.x) * negativeTan + player->pos.y;
+		ray.hit.x = ((int)player.pos.x / tileSize) * tileSize - 0.0001;
+		ray.hit.y = (player.pos.x - ray.hit.x) * negativeTan + player.pos.y;
 		offset.x = -tileSize;
 		offset.y = -offset.x * negativeTan;
 	}
 	//looking right
 	if (ray.angle < M_PI / 2 || ray.angle>3 * M_PI / 2) {
 
-		ray.hit.x = ((int)player->pos.x / tileSize) * tileSize + tileSize;
-		ray.hit.y = (player->pos.x - ray.hit.x) * negativeTan + player->pos.y;
+		ray.hit.x = ((int)player.pos.x / tileSize) * tileSize + tileSize;
+		ray.hit.y = (player.pos.x - ray.hit.x) * negativeTan + player.pos.y;
 		offset.x = tileSize;
 		offset.y = -offset.x * negativeTan;
 	}
 	//looking stright up or down
 	if (ray.angle == 0 || ray.angle == M_PI) {
-		ray.hit.y = player->pos.y;
-		ray.hit.x = player->pos.x;
+		ray.hit.y = player.pos.y;
+		ray.hit.x = player.pos.x;
 		dof = 8;
 	}
 
@@ -192,7 +194,7 @@ RayInfo CalculateRayHit(RayInfo ray, const Player* player, int tileSize, Vector2
 		if (mapIndex >= 0 && mapIndex < mapSize.x * mapSize.y && mapWall[mapIndex] >= 1) {
 			dof = 8;
 			verticalRay = ray.hit;
-			distanceVertical = Distance(player->pos, verticalRay);
+			distanceVertical = Distance(player.pos, verticalRay);
 			wallTextureY = mapWall[mapIndex] - 1;
 
 		}
@@ -266,15 +268,15 @@ TextureDrawInfo CalculateWallTexture(RayInfo ray, int *lineHeight, int textureSi
 	return texInfo;
 }
 
-void DrawRays(Player* player, float FOV_deg,
+void DrawRays(const Player player, float FOV_deg,
 	int* mapWall, int* mapFloor, int* mapCeiling, 
 	Vector2i mapSize, int tileSize, int textureSize, int* Textures,
-	SDL_Renderer* rendererMap, int* pixelBuffer, Vector2i renderSize, Vector2i screenMap)
+	SDL_Renderer* rendererMap, int* pixelBuffer, Vector2i renderSize)
 {
 	float FOV = FOV_deg * DEG;
 
 	RayInfo ray;
-	ray.angle = player->angle - (FOV / 2);
+	ray.angle = player.angle - (FOV / 2);
 	ray.angle = AngleRollOver(ray.angle);
 
 	float rayAngleIncrement = FOV / renderSize.x;
@@ -283,12 +285,12 @@ void DrawRays(Player* player, float FOV_deg,
 	for (int row = 0; row < renderSize.x; row++) {
 		ray = CalculateRayHit(ray, player, tileSize, mapSize, mapWall);
 
-		SDL_SetRenderDrawColor(rendererMap, 255, 255, 255, 255);
-		SDL_RenderDrawLine(rendererMap, player->pos.x, player->pos.y, ray.hit.x, ray.hit.y);
+		SDL_SetRenderDrawColor(rendererMap, 180, 180, 180, 80);
+		SDL_RenderDrawLine(rendererMap, player.pos.x, player.pos.y, ray.hit.x, ray.hit.y);
 
 
 		//----DRAW 3D WALLS ----
-		float cosAngle = AngleRollOver(player->angle - ray.angle);
+		float cosAngle = AngleRollOver(player.angle - ray.angle);
 		ray.distance *= cos(cosAngle); // fix fisheye
 
 		// Walls with distance of one tile will have height of the screen
@@ -309,10 +311,10 @@ void DrawRays(Player* player, float FOV_deg,
 
 		/*for (int y = lineOffset + lineHeight; y < WINDOW_HEIGHT; y++) {
 			float floorDeltaY = y - (WINDOW_HEIGHT / 2);
-			float floorRayAngle = cos(AngleRollOver(player->angle - rayAngle));
+			float floorRayAngle = cos(AngleRollOver(player.angle - rayAngle));
 			Vector2f texturePos = {
-				player->pos.x / 2 + cos(rayAngle) * 158 * TEXTURE_SIZE / floorDeltaY / floorRayAngle,
-				player->pos.y / 2 + cos(rayAngle) * 158 * TEXTURE_SIZE / floorDeltaY / floorRayAngle
+				player.pos.x / 2 + cos(rayAngle) * 158 * TEXTURE_SIZE / floorDeltaY / floorRayAngle,
+				player.pos.y / 2 + cos(rayAngle) * 158 * TEXTURE_SIZE / floorDeltaY / floorRayAngle
 			};
 			int mapPos = mapFloor[(int)(texturePos.y / TEXTURE_SIZE) * mapSize.x + (int)(texturePos.x / TEXTURE_SIZE)] * TEXTURE_SIZE * TEXTURE_SIZE;
 			float color = All_Textures[((int)(texturePos.y) & (TEXTURE_SIZE - 1)) * TEXTURE_SIZE + ((int)(texturePos.x) & (TEXTURE_SIZE - 1)) + mapPos] * 0.7 * 255;

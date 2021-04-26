@@ -26,6 +26,11 @@ int main(void) {
 	InitializeSDL(&window3D, &renderer3D, window3DSize.x, window3DSize.y);
 	InitializeSDL(&windowMap, &rendererMap, windowMapSize.x, windowMapSize.y);
 
+	SDL_DisplayMode DM;
+	SDL_GetCurrentDisplayMode(0, &DM);
+	SDL_SetWindowPosition(window3D, DM.w/2 - window3DSize.x, SDL_WINDOWPOS_CENTERED);
+	SDL_SetWindowPosition(windowMap, DM.w/2 , SDL_WINDOWPOS_CENTERED);
+
 	InputDir inputDir = { 0,0,0,0 };
 	
 	Player player = InitPlayer();
@@ -77,7 +82,7 @@ int main(void) {
 	Uint64 timeLast = 0;
 	double deltaTime = 0;
 
-	//SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
+	SDL_SetRenderDrawBlendMode(rendererMap, SDL_BLENDMODE_BLEND);
 
 	SDL_Texture* bufferTexture = SDL_CreateTexture(renderer3D,
 		SDL_PIXELFORMAT_ARGB8888,
@@ -87,7 +92,6 @@ int main(void) {
 
 	SDL_SetTextureBlendMode(bufferTexture, SDL_BLENDMODE_BLEND);
 
-	//int* pixelBuffer = (int*)malloc(WINDOW_WIDTH * WINDOW_HEIGHT * sizeof(int));
 	unsigned char* pixelBuffer = malloc(window3DSize.x * window3DSize.y * 4);
 	for (int i = 0; i < window3DSize.x * window3DSize.y; i++) {
 		pixelBuffer[(i * 4)] = 0;
@@ -100,24 +104,21 @@ int main(void) {
 
 	//set to 1 when window close button is pressed
 	bool running = true;
-	
-	
-
 	while (running) {
 		deltaTime = GetDeltaTime(&timeNow, &timeLast);
 		//Process events
 		SDL_Event sdl_event;
 		while (SDL_PollEvent(&sdl_event)) {
 
-			switch (sdl_event.type)
-			{
-			case SDL_QUIT:
-				running = false;
-				break;
-			
-			default:
-				break;
+
+			if (sdl_event.type == SDL_WINDOWEVENT) {
+				switch (sdl_event.window.event) {
+				case SDL_WINDOWEVENT_CLOSE:
+					running = false;
+					break;
+				}
 			}
+			
 
 			GetInput(sdl_event, &inputDir, &player.actions);
 		}
@@ -133,22 +134,23 @@ int main(void) {
 
 		//RENDERING
 		//clear the window
-		//SDL_SetRenderDrawColor(renderer, 100, 100, 100, 255);
 		SDL_SetRenderDrawColor(renderer3D, 50, 20, 50, 255); SDL_SetRenderDrawColor(rendererMap, 100, 100, 100, 255);
 		SDL_RenderClear(renderer3D); SDL_RenderClear(rendererMap);
 		ClearBuffer(pixelBuffer, window3DSize);
 
-		
+	
 		
 		DrawMap(mapSize, tileSize, mapWalls, rendererMap);
-		DrawPlayer(&player, rendererMap);
-		DrawRays(&player, FOV, mapWalls,mapFloor, mapCeiling, mapSize, tileSize, textureSize, TextureAtlas, rendererMap, pixelBuffer, window3DSize, windowMapSize);
+		DrawRays(player, FOV, mapWalls, mapFloor, mapCeiling, mapSize, tileSize, textureSize, TextureAtlas, rendererMap, pixelBuffer, window3DSize);
+		DrawPlayer(player, rendererMap);
+		
 
 		SDL_UpdateTexture(bufferTexture, NULL, pixelBuffer, window3DSize.x * 4);
 		SDL_RenderCopy(renderer3D, bufferTexture, NULL, NULL);
 		// draw the image to the window
-		SDL_RenderPresent(renderer3D);
+		
 		SDL_RenderPresent(rendererMap);
+		SDL_RenderPresent(renderer3D);
 
 	}
 
