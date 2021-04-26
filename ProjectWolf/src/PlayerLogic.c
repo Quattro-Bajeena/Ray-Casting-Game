@@ -1,18 +1,29 @@
 #include "stdafx.h"
 #include "PlayerLogic.h"
 
+
+Player InitPlayer() {
+	Player player;
+	player.pos.x = 300;	player.pos.y = 300;
+	player.angle = 0;
+	player.speed = 150;
+	player.turningSpeed = 0.05;
+	player.dir.x = cos(player.angle); 	player.dir.y = sin(player.angle);
+	return player;
+}
+
 void PlayerMovement(Player* player, InputDir inputDir,
 	int* map, int tileSize, Vector2i mapSize,
 	float deltaTime) {
 
-
+	
 	if (inputDir.left) {
-		player->angle -= 0.1;
+		player->angle -= player->turningSpeed;
 		player->dir.x = cos(player->angle) * player->speed * deltaTime;
 		player->dir.y = sin(player->angle) * player->speed * deltaTime;
 	}
 	if (inputDir.right) {
-		player->angle += 0.1;
+		player->angle += player->turningSpeed;
 		player->dir.x = cos(player->angle) * player->speed * deltaTime;
 		player->dir.y = sin(player->angle) * player->speed * deltaTime;
 	}

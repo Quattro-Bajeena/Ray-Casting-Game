@@ -1,7 +1,16 @@
 #pragma once
 #include "utils.h"
 
+typedef struct {
+	Vector2f pos;
+	Vector2f dir;
+	float speed;
+	float angle;
+	float turningSpeed;
+	Actions actions;
+} Player;
 
+Player InitPlayer();
 void PlayerMovement(Player* player, InputDir inputDir,
 	int* map, int tileSize, Vector2i mapSize,
 	float deltaTime);

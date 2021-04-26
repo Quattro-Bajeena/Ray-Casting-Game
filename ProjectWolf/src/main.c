@@ -12,22 +12,30 @@
 
 int main(void) {
 
-	SDL_Window* win;
-	SDL_Renderer* renderer;
-	InitializeSDL(&win, &renderer, WINDOW_WIDTH, WINDOW_HEIGHT);
+	srand(time(NULL));
+
+	SDL_Window* window3D;
+	SDL_Window* windowMap;
+	SDL_Renderer* renderer3D;
+	SDL_Renderer* rendererMap;
+
+
+	const Vector2i window3DSize = { 720, 480 };
+	const Vector2i windowMapSize = { 720, 720 };
+
+	InitializeSDL(&window3D, &renderer3D, window3DSize.x, window3DSize.y);
+	InitializeSDL(&windowMap, &rendererMap, windowMapSize.x, windowMapSize.y);
 
 	InputDir inputDir = { 0,0,0,0 };
 	
-	Player player;
-	player.pos.x = 300;	player.pos.y = 300;
-	player.angle = 0;
-	player.speed = 12;
-	player.dir.x = cos(player.angle); 	player.dir.y = sin(player.angle);
+	Player player = InitPlayer();
+	
+	float FOV = 60;
 
 	Vector2i mapSize = { 8,8 };
 
 	int tileSize = 64;
-
+	int textureSize = 32;
 
 	int mapWalls[] = {
 		1,1,1,1,1,2,1,1,
@@ -69,14 +77,34 @@ int main(void) {
 	Uint64 timeLast = 0;
 	double deltaTime = 0;
 
+	//SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
 
+	SDL_Texture* bufferTexture = SDL_CreateTexture(renderer3D,
+		SDL_PIXELFORMAT_ARGB8888,
+		SDL_TEXTUREACCESS_STREAMING,
+		window3DSize.x,
+		window3DSize.y);
+
+	SDL_SetTextureBlendMode(bufferTexture, SDL_BLENDMODE_BLEND);
+
+	//int* pixelBuffer = (int*)malloc(WINDOW_WIDTH * WINDOW_HEIGHT * sizeof(int));
+	unsigned char* pixelBuffer = malloc(window3DSize.x * window3DSize.y * 4);
+	for (int i = 0; i < window3DSize.x * window3DSize.y; i++) {
+		pixelBuffer[(i * 4)] = 0;
+		pixelBuffer[(i * 4) + 1] = 0;
+		pixelBuffer[(i * 4) + 2] = 0;
+		pixelBuffer[(i * 4) + 3] = 0;
+	}
+
+	
 
 	//set to 1 when window close button is pressed
 	bool running = true;
 	
+	
+
 	while (running) {
 		deltaTime = GetDeltaTime(&timeNow, &timeLast);
-
 		//Process events
 		SDL_Event sdl_event;
 		while (SDL_PollEvent(&sdl_event)) {
@@ -105,25 +133,29 @@ int main(void) {
 
 		//RENDERING
 		//clear the window
-		SDL_SetRenderDrawColor(renderer, 100, 100, 100, 255);
-		SDL_RenderClear(renderer);
+		//SDL_SetRenderDrawColor(renderer, 100, 100, 100, 255);
+		SDL_SetRenderDrawColor(renderer3D, 50, 20, 50, 255); SDL_SetRenderDrawColor(rendererMap, 100, 100, 100, 255);
+		SDL_RenderClear(renderer3D); SDL_RenderClear(rendererMap);
+		ClearBuffer(pixelBuffer, window3DSize);
 
 		
-		DrawMap(mapSize, tileSize, mapWalls, renderer);
-		DrawPlayer(&player, renderer);
-		DrawRays(&player, mapWalls,mapFloor, mapCeiling, mapSize, tileSize, TextureAtlas, renderer);
 		
+		DrawMap(mapSize, tileSize, mapWalls, rendererMap);
+		DrawPlayer(&player, rendererMap);
+		DrawRays(&player, FOV, mapWalls,mapFloor, mapCeiling, mapSize, tileSize, textureSize, TextureAtlas, rendererMap, pixelBuffer, window3DSize, windowMapSize);
 
-
+		SDL_UpdateTexture(bufferTexture, NULL, pixelBuffer, window3DSize.x * 4);
+		SDL_RenderCopy(renderer3D, bufferTexture, NULL, NULL);
 		// draw the image to the window
-		SDL_RenderPresent(renderer);
+		SDL_RenderPresent(renderer3D);
+		SDL_RenderPresent(rendererMap);
 
 	}
 
 
 	//Clean up resources before exiting
-	SDL_DestroyRenderer(renderer);
-	SDL_DestroyWindow(win);
+	SDL_DestroyRenderer(renderer3D); SDL_DestroyRenderer(rendererMap);
+	SDL_DestroyWindow(window3D); SDL_DestroyWindow(windowMap);
 	SDL_Quit();
 	return 0;
 }

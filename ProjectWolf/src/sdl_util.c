@@ -8,7 +8,7 @@ void InitializeSDL(SDL_Window** win, SDL_Renderer** renderer, int width, int hei
 		return 1;
 	}
 
-	(*win) = SDL_CreateWindow("HEllo",
+	(*win) = SDL_CreateWindow("3D Window",
 		SDL_WINDOWPOS_CENTERED,
 		SDL_WINDOWPOS_CENTERED,
 		width, height, 0);
@@ -100,5 +100,5 @@ double GetDeltaTime(Uint64* timeNow, Uint64* timeLast) {
 	*timeLast = *timeNow;
 	*timeNow = SDL_GetPerformanceCounter();
 
-	return (double)((*timeNow - *timeLast) / (double)SDL_GetPerformanceCounter()) * 1000 * 1000;
+	return (double)((*timeNow - *timeLast) / (double)SDL_GetPerformanceFrequency());
 }

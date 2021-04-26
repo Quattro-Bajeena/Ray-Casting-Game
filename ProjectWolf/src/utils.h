@@ -1,13 +1,7 @@
 #pragma once
 #include "sdl_util.h"
 
-typedef struct {
-	Vector2f pos;
-	Vector2f dir;
-	float speed;
-	float angle;
-	Actions actions;
-} Player;
+
 
 int randInt(int min, int max);
 int randomColor();
