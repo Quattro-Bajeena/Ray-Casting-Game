@@ -1,7 +1,7 @@
 #pragma once
 #include "utils.h"
 
-typedef struct {
+typedef struct Player{
 	Vector2f pos;
 	Vector2f dir;
 	float speed;

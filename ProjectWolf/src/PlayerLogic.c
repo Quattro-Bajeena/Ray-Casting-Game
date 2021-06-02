@@ -60,7 +60,6 @@ void PlayerMovement(Player* player, InputDir inputDir,
 
 void PlayerInteraction(Player* player, int* mapWalls, int tileSize, Vector2i mapSize) {
 
-	//Sometinhg fucky is going on
 	int interactDistance = tileSize/2;
 
 	Vector2i interactionGridAddOffset = {
@@ -68,19 +67,17 @@ void PlayerInteraction(Player* player, int* mapWalls, int tileSize, Vector2i map
 		((player->pos).y + player->dir.y * interactDistance) / tileSize
 	};
 	
-
-
 	if (player->actions.interact == true) {
 
 		int interactionMapIndex = interactionGridAddOffset.y * mapSize.x + interactionGridAddOffset.x;
 
 		
-		if (mapWalls[interactionMapIndex] == 4) {
+		/*if (mapWalls[interactionMapIndex] == 4) {
 			mapWalls[interactionMapIndex] = 0;
 		}
 		else if (mapWalls[interactionMapIndex] == 0) {
 			mapWalls[interactionMapIndex] = -1;
-		}
+		}*/
 	}
 
 }

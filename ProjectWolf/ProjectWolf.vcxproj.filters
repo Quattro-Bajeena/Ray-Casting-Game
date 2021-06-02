@@ -19,6 +19,7 @@
     <ClCompile Include="src\Textures.c" />
     <ClCompile Include="src\PlayerLogic.c" />
     <ClCompile Include="src\stdafx.c" />
+    <ClCompile Include="src\LoadFiles.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\utils.h">
@@ -40,6 +41,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\stdafx.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\LoadFiles.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

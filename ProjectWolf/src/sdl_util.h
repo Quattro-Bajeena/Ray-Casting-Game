@@ -3,21 +3,21 @@
 
 void InitializeSDL(SDL_Window** win, SDL_Renderer** renderer, int width, int height);
 
-typedef struct {
+typedef struct InputDir {
 	int up, down, left, right;
 }InputDir;
 
-typedef struct {
+typedef struct Actions {
 	bool interact;
 } Actions;
 
 void GetInput(SDL_Event sdl_event, InputDir* inputDir, Actions* playerActions);
 
-typedef struct {
+typedef struct Vector2i {
 	int x, y;
 }Vector2i;
 
-typedef struct {
+typedef struct Vector2f {
 	float x, y;
 }Vector2f;
 
