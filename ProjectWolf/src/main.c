@@ -15,7 +15,7 @@ int main(void) {
 	Player player = InitPlayer();
 	InputDir inputDir = { 0,0,0,0 };
 
-	float FOV = 120;
+	float FOV = 60;
 
 	int tileSize = 64;
 	int textureSize = 64;
